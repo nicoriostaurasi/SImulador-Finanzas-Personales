@@ -64,7 +64,6 @@ function verTransacciones() {
     for (let t of transacciones) {
         resumen = resumen + `${i}. ${t.getTipo()}: $${t.getMonto()}\n`;
         i = i + 1;
-        console.log(i.toString);
     }
 
     alert(resumen);
