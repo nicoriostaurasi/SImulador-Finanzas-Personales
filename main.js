@@ -19,6 +19,10 @@ class Transaction {
     this.uuid = crypto.randomUUID();
   }
 
+  getUser(){
+    return this.user;
+  }
+
   getDescription() {
     return this.description;
   }
@@ -37,7 +41,29 @@ class Transaction {
 }
 
 function storeTransactionsInLocalStorage() {
-  localStorage.setItem("transactionsList", JSON.stringify(transactionsList));
+  const stored = localStorage.getItem("transactionsList");
+  let existingTransactions = stored ? JSON.parse(stored) : [];
+
+  const nuevos = transactionsList.filter(nuevo => {
+    return !existingTransactions.some(existente => existente.uuid === nuevo.uuid);
+  });
+
+  const actualizadas = existingTransactions.concat(nuevos);
+
+  localStorage.setItem("transactionsList", JSON.stringify(actualizadas));
+}
+
+function deleteTransactionInLocalByUUID(uuid) {
+  const stored = localStorage.getItem("transactionsList");
+  if (!stored) return;
+
+  const transactions = JSON.parse(stored);
+
+  // Filtrar quitando la transacción con el UUID indicado
+  const updatedTransactions = transactions.filter(tx => tx.uuid !== uuid);
+
+  // Guardar la lista actualizada en localStorage
+  localStorage.setItem("transactionsList", JSON.stringify(updatedTransactions));
 }
 
 function registerNewMovement() {
@@ -81,7 +107,7 @@ function deleteMovement(internalReference)
     transactionsList.splice(index, 1);
   }
   console.log("index de la transaccion a borrar:" + index);
-  storeTransactionsInLocalStorage();
+  deleteTransactionInLocalByUUID(internalReference);
   renderMovementsView();
 }
 
@@ -124,6 +150,36 @@ function renderMovementsView() {
   document.getElementById("total-balance").textContent = "Saldo Total: "+ balance.toFixed(2);
 }
 
+function displayTransactions()
+{
+  console.log("en memoria actual");
+  displayTransactionStored();
+  console.log("Guardadas");
+  displayTransactionLocal();
+}
+
+function displayTransactionLocal(){
+  transactionsList.forEach((mov) => {
+      console.log("Transaccion:" + "Monto: " + mov.getAmount() + 
+                  "\nUUID: "+ mov.getInternalReference() +
+                  "\nTipo: "+ mov.getType() +
+                  "\nDescripcion: "+ mov.getDescription() + 
+                  "\nUsuario: "+ mov.getUser());
+  });
+}
+
+function displayTransactionStored()
+{
+  const storedTransactions = localStorage.getItem("transactionsList");
+  if (storedTransactions) {
+    const datos = JSON.parse(storedTransactions);
+    console.log(datos)
+  }     
+  else { 
+    console.log("No hay transactions en local storage")
+  }    
+}
+
 function getListOfTransactionsByCurrentUser()
 {
   const storedTransactions = localStorage.getItem("transactionsList");
@@ -143,20 +199,6 @@ function getListOfTransactionsByCurrentUser()
     });
     renderMovementsView();
   }
-}
-
-function getListOfTransactions(){
-/*   const storedTransactions = localStorage.getItem("transactionsList");
-
-  if (storedTransactions) {
-    const datos = JSON.parse(storedTransactions);
-    transactionsList = datos.map((t) => {
-      const transaction = new Transaction(t.type === "Ingreso" ? "1" : "2", t.amount, t.description);
-      transaction.uuid = t.uuid;
-      return transaction;
-    });
-    renderMovementsView();
-  } */
 }
 
 //Funcion para hacer el login del usuario, verifica un nombre y edad
@@ -191,9 +233,12 @@ function loginUsuario() {
     document.getElementById("user-name").innerText = nombreInput;
     document.getElementById("login-container").style.display = "none";
     document.getElementById("app-container").style.display = "block";
+    document.getElementById("login-nombre").value = "";
+    document.getElementById("login-edad").value = "";
     currentUser = nombreInput;
     sessionStorage.setItem("currentUser",currentUser);
     getListOfTransactionsByCurrentUser();
+    displayTransactions();
   }
 
 function mainWindow() {
@@ -202,24 +247,24 @@ function mainWindow() {
     document.getElementById("login-container").style.display = "none";
     document.getElementById("app-container").style.display = "block";
     getListOfTransactionsByCurrentUser();
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+    logoutBtn.addEventListener("click", function () {
+      sessionStorage.removeItem("currentUser");
+      document.getElementById("login-container").style.display = "block";
+      document.getElementById("app-container").style.display = "none";
+    });
+  }
 }
 
 function main() {
-/*   loginUsuario();
-  console.log(`Usuario ${nombre} de ${edad} años, bienvenido a la plataforma!`);
-  mainMenu(); 
-*/  
-//  getListOfTransactions();
   const sessionUser = sessionStorage.getItem("currentUser");
   if(sessionUser !== null){
     console.log("usuario en la sesion: "+ sessionUser);
     currentUser = sessionUser
     mainWindow();
-  } else
-  {
-
+    displayTransactions();
   }
-
 
 }
 
