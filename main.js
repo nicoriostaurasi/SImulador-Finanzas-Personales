@@ -1,15 +1,13 @@
-let nombre;
-let edad;
-
 let transactionsList = [];
 const type = document.getElementById("type");
 const description = document.getElementById("description");
 const amount = document.getElementById("amount");
 const lista = document.getElementById("movements-list");
+let currentUser;
 
 //Clase para agrupar transactionsList
 class Transaction {
-  constructor(type, amount , description) {
+  constructor(type, amount , description, user) {
     if (type == "1") {
       this.type = "Ingreso";
     } else {
@@ -17,6 +15,7 @@ class Transaction {
     }
     this.description = description;
     this.amount = amount;
+    this.user = user;
     this.uuid = crypto.randomUUID();
   }
 
@@ -50,7 +49,7 @@ function registerNewMovement() {
     alert("Por favor completá todos los campos");
     return;
   }
-  const newTransaction = new Transaction(type, amount,description)
+  const newTransaction = new Transaction(type, amount,description,currentUser)
 
   console.log("Nueva Transaction: Descripcion:" + newTransaction.getDescription() + 
               "\nTipo: " + newTransaction.getType() + 
@@ -125,8 +124,29 @@ function renderMovementsView() {
   document.getElementById("total-balance").textContent = "Saldo Total: "+ balance.toFixed(2);
 }
 
-function getListOfTransactions(){
+function getListOfTransactionsByCurrentUser()
+{
   const storedTransactions = localStorage.getItem("transactionsList");
+  if (storedTransactions) {
+  const datos = JSON.parse(storedTransactions);
+  transactionsList = datos
+    .filter(t => t.user === currentUser)
+    .map(t => {
+      const transaction = new Transaction(
+        t.type === "Ingreso" ? "1" : "2", 
+        t.amount, 
+        t.description, 
+        t.user
+      );
+      transaction.uuid = t.uuid;
+      return transaction;
+    });
+    renderMovementsView();
+  }
+}
+
+function getListOfTransactions(){
+/*   const storedTransactions = localStorage.getItem("transactionsList");
 
   if (storedTransactions) {
     const datos = JSON.parse(storedTransactions);
@@ -136,7 +156,7 @@ function getListOfTransactions(){
       return transaction;
     });
     renderMovementsView();
-  }
+  } */
 }
 
 //Funcion para hacer el login del usuario, verifica un nombre y edad
@@ -167,9 +187,21 @@ function loginUsuario() {
     }
     alert(`Hola ${nombreInput}, bienvenido a la plataforma!`);
 
-    // Mostrar la app y ocultar el login
+    // Mostrar el name, app y ocultar el login
+    document.getElementById("user-name").innerText = nombreInput;
     document.getElementById("login-container").style.display = "none";
     document.getElementById("app-container").style.display = "block";
+    currentUser = nombreInput;
+    sessionStorage.setItem("currentUser",currentUser);
+    getListOfTransactionsByCurrentUser();
+  }
+
+function mainWindow() {
+    console.log("usuario en la sesion: "+ currentUser);
+    document.getElementById("user-name").innerText = currentUser;
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("app-container").style.display = "block";
+    getListOfTransactionsByCurrentUser();
 }
 
 function main() {
@@ -177,7 +209,18 @@ function main() {
   console.log(`Usuario ${nombre} de ${edad} años, bienvenido a la plataforma!`);
   mainMenu(); 
 */  
-  getListOfTransactions();
+//  getListOfTransactions();
+  const sessionUser = sessionStorage.getItem("currentUser");
+  if(sessionUser !== null){
+    console.log("usuario en la sesion: "+ sessionUser);
+    currentUser = sessionUser
+    mainWindow();
+  } else
+  {
+
+  }
+
+
 }
 
 main();
