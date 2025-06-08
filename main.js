@@ -1,140 +1,138 @@
 let nombre;
 let edad;
-let transacciones = [];
 
-const tipo = document.getElementById("tipo");
-const descripcion = document.getElementById("descripcion");
-const monto = document.getElementById("monto");
-const agregarBtn = document.getElementById("agregar");
-const lista = document.getElementById("lista-movimientos");
-const saldoTotal = document.getElementById("saldo-total");
+let transactionsList = [];
+const type = document.getElementById("type");
+const description = document.getElementById("description");
+const amount = document.getElementById("amount");
+const lista = document.getElementById("movements-list");
 
-//Clase para agrupar transacciones
-class Transaccion {
-  constructor(tipo, monto , descripcion) {
-    if (tipo == "1") {
-      this.tipo = "Ingreso";
+//Clase para agrupar transactionsList
+class Transaction {
+  constructor(type, amount , description) {
+    if (type == "1") {
+      this.type = "Ingreso";
     } else {
-      this.tipo = "Egreso";
+      this.type = "Egreso";
     }
-    this.descripcion = descripcion;
-    this.monto = monto;
+    this.description = description;
+    this.amount = amount;
     this.uuid = crypto.randomUUID();
   }
 
   getDescription() {
-    return this.descripcion;
+    return this.description;
   }
 
   getInternalReference() {
     return this.uuid;
   }
 
-  getTipo() {
-    return this.tipo;
+  getType() {
+    return this.type;
   }
 
-  getMonto() {
-    return this.monto;
+  getAmount() {
+    return this.amount;
   }
 }
 
-function guardarTransaccionesEnStorage() {
-  localStorage.setItem("transacciones", JSON.stringify(transacciones));
+function storeTransactionsInLocalStorage() {
+  localStorage.setItem("transactionsList", JSON.stringify(transactionsList));
 }
 
-function registrarMovimiento() {
-  const tipo = document.getElementById("tipo").value;
-  const descripcion = document.getElementById("descripcion").value;
-  const monto = parseFloat(document.getElementById("monto").value);
+function registerNewMovement() {
+  const type = document.getElementById("type").value;
+  const description = document.getElementById("description").value;
+  const amount = parseFloat(document.getElementById("amount").value);
 
-  if (!descripcion || isNaN(monto)) {
+  if (!description || isNaN(amount)) {
     alert("Por favor completá todos los campos");
     return;
   }
-  const newTransaction = new Transaccion(tipo, monto,descripcion)
+  const newTransaction = new Transaction(type, amount,description)
 
-  console.log("Nueva Transaccion: Descripcion:" + newTransaction.getDescription() + 
-              "\nTipo: " + newTransaction.getTipo() + 
-              "\nMonto: " + newTransaction.getMonto())
+  console.log("Nueva Transaction: Descripcion:" + newTransaction.getDescription() + 
+              "\nTipo: " + newTransaction.getType() + 
+              "\nMonto: " + newTransaction.getAmount())
 
-  transacciones.push(newTransaction);
-  actualizarVistaDeMovimientos();
-  guardarTransaccionesEnStorage();
+  transactionsList.push(newTransaction);
+  renderMovementsView();
+  storeTransactionsInLocalStorage();
 }
 
-function eliminarMovimiento(internalReference)
+function deleteMovement(internalReference)
 {
-  const transaccionAEliminar = transacciones.find(
+  const transactionToDelete = transactionsList.find(
     (mov) => mov.getInternalReference() === internalReference
   );
 
-  console.log("transaccion a borrar:\n" + "Monto: " + transaccionAEliminar.getMonto() + 
-  "\nUUID: "+ transaccionAEliminar.getInternalReference() +
-  "\nTipo: "+ transaccionAEliminar.getTipo() +
-  "\nDescripcion: "+ transaccionAEliminar.getDescription());
+  console.log("transaccion a borrar:\n" + "Monto: " + transactionToDelete.getAmount() + 
+  "\nUUID: "+ transactionToDelete.getInternalReference() +
+  "\nTipo: "+ transactionToDelete.getType() +
+  "\nDescripcion: "+ transactionToDelete.getDescription());
 
-  const index = transacciones.findIndex(
+  const index = transactionsList.findIndex(
   (mov) => mov.getInternalReference() === internalReference
   );
   if (index !== -1) {
-    transacciones.splice(index, 1);
+    transactionsList.splice(index, 1);
   }
   console.log("index de la transaccion a borrar:" + index);
-  guardarTransaccionesEnStorage();
-  actualizarVistaDeMovimientos();
+  storeTransactionsInLocalStorage();
+  renderMovementsView();
 }
 
-function actualizarVistaDeMovimientos() {
-  const lista = document.getElementById("lista-movimientos");
+function renderMovementsView() {
+  const lista = document.getElementById("movements-list");
   lista.innerHTML = "";
-  let saldo = 0;
+  let balance = 0;
 
-  transacciones.forEach((mov) => {     
+  transactionsList.forEach((mov) => {     
     const item = document.createElement("li");
     item.className =
     "list-group-item bg-transparent d-flex justify-content-between align-items-center";
 
-    const texto = document.createElement("span");
-    texto.textContent = `${mov.getDescription()} - $${mov.getMonto().toFixed(2)} (${mov.getTipo()})`;
+    const text = document.createElement("span");
+    text.textContent = `${mov.getDescription()} - $${mov.getAmount().toFixed(2)} (${mov.getType()})`;
 
-    if(mov.getTipo() === "Ingreso") {
-      texto.classList.add("transaction-in")
-       saldo += mov.monto;
+    if(mov.getType() === "Ingreso") {
+      text.classList.add("transaction-in")
+       balance += mov.getAmount();
     } else {
-      texto.classList.add("transaction-out")
-      saldo -= mov.monto;
+      text.classList.add("transaction-out")
+      balance -= mov.getAmount();
     }
 
-    const btnEliminar = document.createElement("button");
-    btnEliminar.className = "btn btn-sm btn-outline-danger ms-2";
-    btnEliminar.innerHTML = '<i class="bi bi-trash"></i>';
-    btnEliminar.onclick = () => {
-      const respuesta = confirm("Esta seguro que desea eliminar esta transacción?")
-      if(respuesta){
-        eliminarMovimiento(mov.getInternalReference())
+    const btnDelete = document.createElement("button");
+    btnDelete.className = "btn btn-sm btn-outline-danger ms-2";
+    btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
+    btnDelete.onclick = () => {
+      const answerOnConfirmDelete = confirm("Esta seguro que desea eliminar esta transacción?")
+      if(answerOnConfirmDelete){
+        deleteMovement(mov.getInternalReference())
       }
     };
 
-    item.appendChild(texto);
-    item.appendChild(btnEliminar);
+    item.appendChild(text);
+    item.appendChild(btnDelete);
     lista.appendChild(item);
   });
 
-  document.getElementById("saldo-total").textContent = "Saldo Total: "+ saldo.toFixed(2);
+  document.getElementById("total-balance").textContent = "Saldo Total: "+ balance.toFixed(2);
 }
 
-function obtenerListaDeTransacciones(){
-  const transaccionesGuardadas = localStorage.getItem("transacciones");
+function getListOfTransactions(){
+  const storedTransactions = localStorage.getItem("transactionsList");
 
-  if (transaccionesGuardadas) {
-    const datos = JSON.parse(transaccionesGuardadas);
-    transacciones = datos.map((t) => {
-      const transaccion = new Transaccion(t.tipo === "Ingreso" ? "1" : "2", t.monto, t.descripcion);
-      transaccion.uuid = t.uuid;
-      return transaccion;
+  if (storedTransactions) {
+    const datos = JSON.parse(storedTransactions);
+    transactionsList = datos.map((t) => {
+      const transaction = new Transaction(t.type === "Ingreso" ? "1" : "2", t.amount, t.description);
+      transaction.uuid = t.uuid;
+      return transaction;
     });
-    actualizarVistaDeMovimientos();
+    renderMovementsView();
   }
 }
 
@@ -179,7 +177,7 @@ function main() {
   console.log(`Usuario ${nombre} de ${edad} años, bienvenido a la plataforma!`);
   mainMenu(); 
 */  
-  obtenerListaDeTransacciones();
+  getListOfTransactions();
 }
 
 main();
