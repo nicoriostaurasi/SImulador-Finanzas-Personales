@@ -39,46 +39,6 @@ class Transaccion {
   }
 }
 
-/* agregarBtn.addEventListener("click", () => {
-  const tipoValor = tipo.value;
-  const descripcionValor = descripcion.value.trim();
-  const montoValor = parseFloat(monto.value);
-
-  // Validaciones básicas
-  if (!descripcionValor || isNaN(montoValor) || montoValor <= 0) {
-    alert("Por favor, completá todos los campos correctamente.");
-    return;
-  }
-
-  // Crear el elemento para mostrar el movimiento
-  const item = document.createElement("li");
-  item.className = `list-group-item d-flex justify-content-between ${
-    tipoValor === "ingreso" ? "text-success" : "text-danger"
-  }`;
-
-  item.textContent = `${
-    tipoValor === "ingreso" ? "+" : "-"
-  } ${descripcionValor}: $${montoValor.toFixed(2)}`;
-
-  // Agregar a la lista
-  lista.appendChild(item);
-
-  // Actualizar el saldo
-  if (tipoValor === "ingreso") {
-    saldo += montoValor;
-  } else {
-    saldo -= montoValor;
-  }
-
-  // Mostrar el nuevo saldo
-  saldoTotal.textContent = saldo.toFixed(2);
-
-  // Limpiar los campos
-  descripcion.value = "";
-  monto.value = "";
-});
- */
-
 function registrarMovimiento() {
   const tipo = document.getElementById("tipo").value;
   const descripcion = document.getElementById("descripcion").value;
@@ -125,24 +85,7 @@ function actualizarVistaDeMovimientos() {
   lista.innerHTML = "";
   let saldo = 0;
 
-  transacciones.forEach((mov) => { 
-/*     const item = document.createElement("li");
-    if(mov.tipo === "ingreso") {
-    item.className =
-      "list-group-item bg-transparent transaction-in d-flex justify-content-between";
-    item.textContent = `${mov.descripcion} - $${mov.monto.toFixed(2)} (${
-      mov.tipo
-    })`;
-    } else {
-    item.className =
-      "list-group-item bg-transparent transaction-out d-flex justify-content-between";
-    item.textContent = `${mov.descripcion} - $${mov.monto.toFixed(2)} (${
-      mov.tipo
-    })`;
-    }
-    lista.appendChild(item);
- */
-    
+  transacciones.forEach((mov) => {     
     const item = document.createElement("li");
     item.className =
     "list-group-item bg-transparent d-flex justify-content-between align-items-center";
@@ -162,7 +105,10 @@ function actualizarVistaDeMovimientos() {
     btnEliminar.className = "btn btn-sm btn-outline-danger ms-2";
     btnEliminar.innerHTML = '<i class="bi bi-trash"></i>';
     btnEliminar.onclick = () => {
-      eliminarMovimiento(mov.getInternalReference())
+      const respuesta = confirm("Esta seguro que desea eliminar esta transacción?")
+      if(respuesta){
+        eliminarMovimiento(mov.getInternalReference())
+      }
     };
 
     item.appendChild(texto);
@@ -406,7 +352,8 @@ function loginUsuario() {
 function main() {
 /*   loginUsuario();
   console.log(`Usuario ${nombre} de ${edad} años, bienvenido a la plataforma!`);
-  mainMenu(); */
+  mainMenu(); 
+*/  
 }
 
 main();
