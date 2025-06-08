@@ -56,6 +56,9 @@ function registerNewMovement() {
               "\nTipo: " + newTransaction.getType() + 
               "\nMonto: " + newTransaction.getAmount())
 
+  document.getElementById("description").value = "";
+  document.getElementById("amount").value = "";
+
   transactionsList.push(newTransaction);
   renderMovementsView();
   storeTransactionsInLocalStorage();
