@@ -141,38 +141,35 @@ function getListOfTransactions(){
 
 //Funcion para hacer el login del usuario, verifica un nombre y edad
 function loginUsuario() {
-  console.log("Bienvenido al simulador de finanzas personales");
-  let inputNombreIsValid;
-  let edadValid;
-  do {
-    do {
-      inputNombreIsValid = true;
-      nombre = prompt(
-        "Hola, bienvenido al simulador de finanzas personales\n" +
-          "¿Cuál es tu nombre?"
-      );
-      if (!/^[a-zA-Z]+$/.test(nombre)) {
-        inputNombreIsValid = false;
-        alert("Su nombre no debe contener espacios, simbolos o números");
-      }
-    } while (inputNombreIsValid === false);
-    console.log("Hola " + nombre + " bienvenido al simulador");
+    console.log("Bienvenido al simulador de finanzas personales");
+    const nombreInput = document.getElementById("login-nombre").value.trim();
+    const edadInput = parseInt(document.getElementById("login-edad").value);
 
-    do {
-      edadValid = true;
-      edad = parseInt(prompt("¿Cuántos años tienes?"));
-      if (isNaN(edad)) {
-        edadValid = false;
-        alert("La edad debe ser un numero");
-      } else {
-        console.log("La edad ingresada es: " + edad);
-      }
-    } while (edadValid === false);
-    if (edad < 18) {
-      alert("Debes ser mayor de 18 años para ingresar a la plataforma");
+    if (!/^[a-zA-Z]+$/.test(nombreInput)) {
+        alert("El nombre debe contener solo letras, sin espacios ni símbolos.");
+        document.getElementById("login-nombre").value = "";
+        document.getElementById("login-edad").value = "";
+        return;
     }
-  } while (edad < 18);
-  alert(`Hola ${nombre}, bienvenido a la plataforma!`);
+
+    if (isNaN(edadInput)) {
+        alert("La edad debe ser un número.");
+        document.getElementById("login-nombre").value = "";
+        document.getElementById("login-edad").value = "";
+        return;
+    }
+
+    if (edadInput < 18) {
+        alert("Debes ser mayor de 18 años para ingresar.");
+        document.getElementById("login-nombre").value = "";
+        document.getElementById("login-edad").value = "";
+        return;
+    }
+    alert(`Hola ${nombreInput}, bienvenido a la plataforma!`);
+
+    // Mostrar la app y ocultar el login
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("app-container").style.display = "block";
 }
 
 function main() {
