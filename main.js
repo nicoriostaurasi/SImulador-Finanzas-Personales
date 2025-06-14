@@ -122,7 +122,12 @@ function renderMovementsView() {
     "list-group-item bg-transparent d-flex justify-content-between align-items-center";
 
     const text = document.createElement("span");
-    text.textContent = `${mov.getDescription()} - $${mov.getAmount().toFixed(2)} (${mov.getType()})`;
+    const formattedAmount = new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(mov.getAmount());
+
+    text.textContent = `${mov.getDescription()} - ${formattedAmount} $ (${mov.getType()})`;
 
     if(mov.getType() === "Ingreso") {
       text.classList.add("transaction-in")
@@ -147,7 +152,13 @@ function renderMovementsView() {
     lista.appendChild(item);
   });
 
-  document.getElementById("total-balance").textContent = "Saldo Total: "+ balance.toFixed(2);
+    const formattedBalance = new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(balance);
+
+  document.getElementById("total-balance").textContent = "Saldo Total: " + formattedBalance + " $";
+
 }
 
 function displayTransactions()

@@ -41,3 +41,11 @@
     .transaction-out{
         color: red;        
     }
+
+
+    #movements-list {
+    max-height: 250px; /* Altura estimada para unas 10 transacciones */
+    overflow-y: auto;
+    }
+
+  
