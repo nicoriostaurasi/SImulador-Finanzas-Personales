@@ -75,6 +75,12 @@ function registerNewMovement() {
     alert("Por favor completá todos los campos");
     return;
   }
+
+  if (amount <= 0) {
+    alert("El monto ingresado debe ser mayor a 0");
+    return;
+  }
+
   const newTransaction = new Transaction(type, amount,description,currentUser)
 
   console.log("Nueva Transaction: Descripcion:" + newTransaction.getDescription() + 
@@ -111,55 +117,64 @@ function deleteMovement(internalReference)
   renderMovementsView();
 }
 
+function processBalance(transactions) {
+  return transactions.reduce((acc, mov) => {
+    if (mov.getType() === "Ingreso") {
+      return acc + mov.getAmount();
+    } else {
+      return acc - mov.getAmount();
+    }
+  }, 0);
+}
+
 function renderMovementsView() {
   const lista = document.getElementById("movements-list");
   lista.innerHTML = "";
-  let balance = 0;
 
-  transactionsList.forEach((mov) => {     
-    const item = document.createElement("li");
-    item.className =
-    "list-group-item bg-transparent d-flex justify-content-between align-items-center";
+  const balance = transactionsList.reduce((acc, mov) => {
+    return mov.getType() === "Ingreso"
+      ? acc + mov.getAmount()
+      : acc - mov.getAmount();
+  }, 0);
 
-    const text = document.createElement("span");
+  transactionsList.forEach((mov) => {
     const formattedAmount = new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(mov.getAmount());
 
-    text.textContent = `${mov.getDescription()} - ${formattedAmount} $ (${mov.getType()})`;
+    const item = document.createElement("li");
+    item.className = "list-group-item bg-transparent d-flex justify-content-between align-items-center";
 
-    if(mov.getType() === "Ingreso") {
-      text.classList.add("transaction-in")
-       balance += mov.getAmount();
-    } else {
-      text.classList.add("transaction-out")
-      balance -= mov.getAmount();
-    }
+    item.innerHTML = `
+      <span class="${mov.getType() === "Ingreso" ? "transaction-in" : "transaction-out"}">
+        ${mov.getDescription()} - ${formattedAmount} $ (${mov.getType()})
+      </span>
+      <button class="btn btn-sm btn-outline-danger ms-2">
+        <i class="bi bi-trash"></i>
+      </button>
+    `;
 
-    const btnDelete = document.createElement("button");
-    btnDelete.className = "btn btn-sm btn-outline-danger ms-2";
-    btnDelete.innerHTML = '<i class="bi bi-trash"></i>';
-    btnDelete.onclick = () => {
-      const answerOnConfirmDelete = confirm("Esta seguro que desea eliminar esta transacción?")
-      if(answerOnConfirmDelete){
-        deleteMovement(mov.getInternalReference())
+    const btnDelete = item.querySelector("button");
+    btnDelete.addEventListener("click", () => {
+      const confirmDelete = confirm("¿Está seguro que desea eliminar esta transacción?");
+      if (confirmDelete) {
+        deleteMovement(mov.getInternalReference());
       }
-    };
+    });
 
-    item.appendChild(text);
-    item.appendChild(btnDelete);
     lista.appendChild(item);
   });
 
-    const formattedBalance = new Intl.NumberFormat('es-AR', {
+  const formattedBalance = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(balance);
 
   document.getElementById("total-balance").textContent = "Saldo Total: " + formattedBalance + " $";
-
 }
+
+
 
 function displayTransactions()
 {
@@ -277,6 +292,19 @@ function main() {
     displayTransactions();
   }
 
+    document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("login-click-button");
+    const addMovementBtn = document.getElementById("register-new-movement-button");
+
+    if (loginBtn) {
+      loginBtn.addEventListener("click", loginUsuario);
+    }
+
+    if (addMovementBtn) {
+      addMovementBtn.addEventListener("click", registerNewMovement);
+    }
+    }
+  );
 }
 
 main();
