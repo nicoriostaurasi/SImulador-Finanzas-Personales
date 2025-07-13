@@ -4,6 +4,19 @@ const description = document.getElementById("description");
 const amount = document.getElementById("amount");
 const lista = document.getElementById("movements-list");
 let currentUser;
+const darkSwal = Swal.mixin({
+  background: "#1e1e2f",
+  color: "#ffffff",
+  confirmButtonColor: "#4caf50",
+  cancelButtonColor: "#d33",
+  customClass: {
+    popup: "rounded-3 shadow",
+    title: "fs-4",
+    confirmButton: "btn btn-primary",
+    cancelButton: "btn btn-secondary",
+  },
+  buttonsStyling: false,
+});
 
 //Clase para agrupar transactionsList
 class Transaction {
@@ -74,12 +87,22 @@ function registerNewMovement() {
   const amount = parseFloat(document.getElementById("amount").value);
 
   if (!description || isNaN(amount)) {
-    alert("Por favor completá todos los campos");
+    darkSwal.fire(
+      "Campos incompletos",
+      "Por favor completá todos los campos",
+      "warning"
+    );
     return;
   }
 
   if (amount <= 0) {
-    alert("El monto ingresado debe ser mayor a 0");
+    darkSwal.fire(
+      "Monto incorrecto",
+      "El monto ingresado de la transacción " +
+        description +
+        " debe ser mayor a 0",
+      "warning"
+    );
     return;
   }
 
@@ -179,12 +202,20 @@ function renderMovementsView() {
 
     const btnDelete = item.querySelector("button");
     btnDelete.addEventListener("click", () => {
-      const confirmDelete = confirm(
-        "¿Está seguro que desea eliminar esta transacción?"
-      );
-      if (confirmDelete) {
-        deleteMovement(mov.getInternalReference());
-      }
+      darkSwal
+        .fire({
+          title: "¿Está seguro?",
+          text: "Esta transacción se eliminará permanentemente.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            deleteMovement(mov.getInternalReference());
+          }
+        });
     });
 
     lista.appendChild(item);
@@ -261,26 +292,38 @@ function loginUsuario() {
   const edadInput = parseInt(document.getElementById("login-edad").value);
 
   if (!/^[a-zA-Z]+$/.test(nombreInput)) {
-    alert("El nombre debe contener solo letras, sin espacios ni símbolos.");
+    darkSwal.fire(
+      "Usuario Incorrecto",
+      "El nombre debe contener solo letras, sin espacios ni símbolos",
+      "error"
+    );
     document.getElementById("login-nombre").value = "";
     document.getElementById("login-edad").value = "";
     return;
   }
 
   if (isNaN(edadInput)) {
-    alert("La edad debe ser un número.");
+    darkSwal.fire("Usuario Incorrecto", "La edad debe ser un número", "error");
     document.getElementById("login-nombre").value = "";
     document.getElementById("login-edad").value = "";
     return;
   }
 
   if (edadInput < 18) {
-    alert("Debes ser mayor de 18 años para ingresar.");
+    darkSwal.fire(
+      "Usuario Incorrecto",
+      "Debes ser mayor de 18 años para ingresar",
+      "error"
+    );
     document.getElementById("login-nombre").value = "";
     document.getElementById("login-edad").value = "";
     return;
   }
-  alert(`Hola ${nombreInput}, bienvenido a la plataforma!`);
+  darkSwal.fire({
+    title: `Hola ${nombreInput}!`,
+    text: "Bienvenido a la plataforma",
+    icon: "success",
+  });
 
   // Mostrar el name, app y ocultar el login
   document.getElementById("user-name").innerText = nombreInput;
