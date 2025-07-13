@@ -1,5 +1,3 @@
-# ProyectoFinal-Rios
-
 ## 💸 Simulador de Finanzas Personales
 
 Este proyecto es un simulador interactivo que permite a un usuario registrar ingresos y egresos personales, calculando automáticamente el saldo total. Es parte del trabajo final del curso de JavaScript.
