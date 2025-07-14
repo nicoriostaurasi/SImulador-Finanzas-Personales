@@ -5,12 +5,24 @@ let cotizacionChart = null;
 async function fetchDolarData() {
   try {
     const response = await fetch(`${dolarApiBaseURL}${dolarPath}`);
-    if (!response.ok) throw new Error("Error al obtener cotizaciones");
+    if (!response.ok) throw new Error("Error al obtener cotizaciones desde la API");
+
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error al consultar la API de dólar:", error);
-    return [];
+    console.error("Fallo al consultar la API de dólar:", error);
+    console.warn("Cargando datos desde el mock local...");
+
+    try {
+      const fallbackResponse = await fetch("data/dolar-mock.json");
+      if (!fallbackResponse.ok) throw new Error("Error al cargar el mock local");
+
+      const mockData = await fallbackResponse.json();
+      return mockData;
+    } catch (fallbackError) {
+      console.error("También falló la carga del mock local:", fallbackError);
+      return [];
+    }
   }
 }
 
