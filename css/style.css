@@ -1,53 +1,75 @@
-    body {
-        background-color: #121212;
-        color: #ffffff;
-        padding: 20px;
-    }
+body {
+  background-color: #121212;
+  color: #ffffff;
+  padding: 20px;
+}
 
-    .card {
-        background-color: #1e1e2f;
-        color: #ffffff;
-        border: none;
-        margin-bottom: 30px;
-    }
+.card {
+  background-color: #1e1e2f;
+  color: #ffffff;
+  border: none;
+  margin-bottom: 30px;
+}
 
-    .form-control,
-    .form-select {
-        background-color: #2e2e3e;
-        color: #ffffff;
-        border: none;
-    }
+.form-control,
+.form-select {
+  background-color: #2e2e3e;
+  color: #ffffff;
+  border: none;
+}
 
-    .btn-primary {
-        background-color: #4caf50;
-        border: none;
-    }
+.btn-primary {
+  background-color: #4caf50;
+  border: none;
+}
 
-    .btn-primary:hover {
-        background-color: #43a047;
-    }
+.btn-primary:hover {
+  background-color: #43a047;
+}
 
-    .chart-container {
-        background-color: #1e1e2f;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 20px;
-    }
+.chart-container {
+  background-color: #1e1e2f;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
 
-    .transaction-in{
-        color: greenyellow;
-    }
-    
-    .transaction-out{
-        color: red;        
-    }
+.transaction-in {
+  color: greenyellow;
+}
 
+.transaction-out {
+  color: red;
+}
 
-    #movements-list {
-    max-height: 250px; /* Altura estimada para unas 10 transacciones */
-    overflow-y: auto;
-    }
+#movements-list {
+  max-height: 250px; /* Altura estimada para unas 10 transacciones */
+  overflow-y: auto;
+}
 
-    .swal2-actions .btn {
-    margin: 0 6px;
-    }
+.swal2-actions .btn {
+  margin: 0 6px;
+}
+
+#dolar-dashboard select,
+#dolar-dashboard input[type="date"] {
+  background-color: #2e2e3e;
+  color: #ffffff;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+#dolar-dashboard input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+#dolar-selectors .form-select,
+#dolar-selectors .form-control {
+  min-width: 200px;
+}
+
+#dolar-selectors-2 .form-select,
+#dolar-selectors-2 .form-control {
+  min-width: 200px;
+}

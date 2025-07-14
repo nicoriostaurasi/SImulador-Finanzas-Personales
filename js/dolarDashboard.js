@@ -1,7 +1,6 @@
 const dolarApiBaseURL = "https://api.argentinadatos.com";
 const dolarPath = "/v1/cotizaciones/dolares";
 let cotizacionChart = null;
-const dolarDashboardContainer = document.getElementById("dolar-dashboard");
 
 async function fetchDolarData() {
   try {
@@ -16,124 +15,158 @@ async function fetchDolarData() {
 }
 
 function splitCotizationsByType(data) {
-  const cotizacionesPorCasa = {};
+  const cotizationByType = {};
   data.forEach((entry) => {
-    const casa = entry.casa;
-    if (!cotizacionesPorCasa[casa]) {
-      cotizacionesPorCasa[casa] = [];
+    const type = entry.casa;
+    if (!cotizationByType[type]) {
+      cotizationByType[type] = [];
     }
-    cotizacionesPorCasa[casa].push(entry);
+    cotizationByType[type].push(entry);
   });
-  return cotizacionesPorCasa;
+  return cotizationByType;
 }
 
-
-function renderSelectedCotization(casa, cotizationsVector, cantidad = 10) {
-  const cotizaciones = cotizationsVector[casa];
+function renderSelectedCotization(type, cotizationsVector, fromDate, toDate) {
+  const cotizaciones = cotizationsVector[type];
   if (!cotizaciones || cotizaciones.length === 0) return;
 
-  const recientes = cotizaciones.slice(-cantidad); // últimas N
-  const ultima = recientes[recientes.length - 1];
+  const filtradas = cotizaciones.filter((c) => {
+    const fecha = new Date(c.fecha);
+    return fecha >= fromDate && fecha <= toDate;
+  });
+
+  if (filtradas.length === 0) return;
+
+  //La ultima que se obtiene del GET
+  const ultima = filtradas[filtradas.length - 1];
 
   let resultadoDiv = document.getElementById("cotizacion-resultado");
-  if (resultadoDiv) resultadoDiv.remove();
-
-  resultadoDiv = document.createElement("div");
-  resultadoDiv.id = "cotizacion-resultado";
-  resultadoDiv.className = "mt-3";
 
   resultadoDiv.innerHTML = `
-    <div class="card p-4">
-      <h5 class="text-capitalize">${casa}</h5>
-      <p><strong>Compra:</strong> $${ultima.compra}</p>
-      <p><strong>Venta:</strong> $${ultima.venta}</p>
-      <p class="text-muted">Fecha: ${ultima.fecha}</p>
-      <canvas id="cotizacionChart" height="300"></canvas>
+  <div id="cotizacion-resultado">
+    <div class="d-flex justify-content-center">
+      <div class="card p-4"">
+        <h5 class="text-capitalize">${type}</h5>
+        <p><strong>Compra:</strong> $${ultima.compra}</p>
+        <p><strong>Venta:</strong> $${ultima.venta}</p>
+        <p><strong>Última Actualización:</strong> ${ultima.fecha}</p>
+      </div>
     </div>
+  </div>
   `;
-
-  const container = document.getElementById("dolar-dashboard");
-  container.appendChild(resultadoDiv);
 
   if (cotizacionChart) {
     cotizacionChart.destroy();
   }
 
-  const fechas = recientes.map(c => c.fecha);
-  const precios = recientes.map(c => c.venta);
+  const fechas = filtradas.map((c) => c.fecha);
+  const precios = filtradas.map((c) => c.venta);
 
-  const ctx = document.getElementById("cotizacionChart").getContext("2d");
+  const ctx = document.getElementById("dolar-graph").getContext("2d");
   cotizacionChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: fechas,
-      datasets: [{
-        label: "Venta",
-        data: precios,
-        borderColor: "#4caf50",
-        backgroundColor: "rgba(76, 175, 80, 0.2)",
-        borderWidth: 2,
-        pointRadius: 3,
-        tension: 0.3,
-      }]
+      datasets: [
+        {
+          label: "Venta",
+          data: precios,
+          borderColor: "#4caf50",
+          backgroundColor: "rgba(76, 175, 80, 0.2)",
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.3,
+        },
+      ],
     },
     options: {
       responsive: true,
       scales: {
         y: { beginAtZero: false },
-        x: { ticks: { color: "#fff" } }
+        x: { ticks: { color: "#fff" } },
       },
       plugins: {
-        legend: { labels: { color: "#ffffff" } }
-      }
-    }
+        legend: { labels: { color: "#ffffff" } },
+      },
+    },
   });
 }
 
 function renderDolarDashboard(data) {
   const cotizationsVector = splitCotizationsByType(data);
-  const casas = Object.keys(cotizationsVector);
-  const container = document.getElementById("dolar-dashboard");
-  container.innerHTML = "";
+  const types = Object.keys(cotizationsVector);
 
-  const casaSelect = document.createElement("select");
-  casaSelect.className = "form-select mb-3";
-  casaSelect.id = "casa-select";
+  const selectorsContainer = document.getElementById("dolar-selectors");
+  
+  const optionsHTML = types
+    .map(
+      (casa) =>
+        `<option value="${casa}">${
+          casa.charAt(0).toUpperCase() + casa.slice(1)
+        }</option>`
+    )
+    .join("");
 
-  casas.forEach((casa) => {
-    const option = document.createElement("option");
-    option.value = casa;
-    option.textContent = casa.charAt(0).toUpperCase() + casa.slice(1);
-    casaSelect.appendChild(option);
-  });
+  selectorsContainer.innerHTML = `
+    <div id="dolar-selectors">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <h5 class="mb-0">Tipo de Dolar:</h5>
+        <select class="form-select mb-3" id="type-select">
+          ${optionsHTML}        
+        </select>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <h5 class="mb-3">Fecha desde:</h5>
+          <input type="date" class="form-control" id="from-date">
+        </div>
+        <div class="col-md-6">
+          <h5 class="mb-3">Fecha hasta:</h5>
+          <input type="date" class="form-control" id="to-date">
+        </div>
+      </div>
+    </div>
+  `;
 
-  const periodSelect = document.createElement("select");
-  periodSelect.className = "form-select mb-3 ms-3";
-  periodSelect.id = "period-select";
+  // Referencia al HTML
+  const typeSelect = document.getElementById("type-select");
+  const fromInput = document.getElementById("from-date");
+  const toInput = document.getElementById("to-date");
 
-  [5, 10, 15, 20].forEach((num) => {
-    const option = document.createElement("option");
-    option.value = num;
-    option.textContent = `${num} mediciones`;
-    if (num === 10) option.selected = true;
-    periodSelect.appendChild(option);
-  });
+  // Rango por defecto: último mes
+  const today = new Date();
+  const monthAgo = new Date();
+  monthAgo.setMonth(today.getMonth() - 1);
+  fromInput.valueAsDate = monthAgo;
+  toInput.valueAsDate = today;
 
-  const selectRow = document.createElement("div");
-  selectRow.className = "d-flex align-items-center mb-3";
-  selectRow.appendChild(casaSelect);
-  selectRow.appendChild(periodSelect);
-
-  container.appendChild(selectRow);
-
-  function renderActual() {
-    renderSelectedCotization(casaSelect.value, cotizationsVector, parseInt(periodSelect.value));
+  function renderList() {
+    const from = new Date(fromInput.value);
+    const to = new Date(toInput.value);
+    if(to.getTime() == from.getTime()) {
+    darkSwal.fire({
+        icon: "error",
+        title: "Rango de fechas inválido",
+        text: "La fecha 'Desde' no puede ser igual a la fecha 'Hasta'",
+      });
+      return;
+    }
+    if (from > to) {
+      darkSwal.fire({
+        icon: "error",
+        title: "Rango de fechas inválido",
+        text: "La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'",
+      });
+      return;
+    }
+    renderSelectedCotization(typeSelect.value, cotizationsVector, from, to);
   }
 
-  casaSelect.addEventListener("change", renderActual);
-  periodSelect.addEventListener("change", renderActual);
+  typeSelect.addEventListener("change", renderList);
+  fromInput.addEventListener("change", renderList);
+  toInput.addEventListener("change", renderList);
 
-  renderActual(); // primera carga
+  renderList();
 }
 
 (async function initDolarDashboard() {
