@@ -69,7 +69,11 @@ body {
   min-width: 200px;
 }
 
-#dolar-selectors-2 .form-select,
-#dolar-selectors-2 .form-control {
-  min-width: 200px;
+#cotizacion-resultado .card{
+    background-color: #2e2e3e;
+}
+
+#dolar-graph-container{
+    background-color: #2e2e3e;
+    border-radius: 1px;
 }

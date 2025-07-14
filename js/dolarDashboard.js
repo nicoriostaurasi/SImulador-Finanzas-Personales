@@ -43,16 +43,14 @@ function renderSelectedCotization(type, cotizationsVector, fromDate, toDate) {
   let resultadoDiv = document.getElementById("cotizacion-resultado");
 
   resultadoDiv.innerHTML = `
-  <div id="cotizacion-resultado">
     <div class="d-flex justify-content-center">
-      <div class="card p-4"">
+      <div class="border border-light rounded p-4 card">
         <h5 class="text-capitalize">${type}</h5>
-        <p><strong>Compra:</strong> $${ultima.compra}</p>
-        <p><strong>Venta:</strong> $${ultima.venta}</p>
-        <p><strong>Última Actualización:</strong> ${ultima.fecha}</p>
+          <p><strong>Compra:</strong> $${ultima.compra}</p>
+          <p><strong>Venta:</strong> $${ultima.venta}</p>
+          <p><strong>Última Actualización:</strong> ${ultima.fecha}</p>
       </div>
     </div>
-  </div>
   `;
 
   if (cotizacionChart) {
@@ -62,14 +60,22 @@ function renderSelectedCotization(type, cotizationsVector, fromDate, toDate) {
   const fechas = filtradas.map((c) => c.fecha);
   const precios = filtradas.map((c) => c.venta);
 
-  const ctx = document.getElementById("dolar-graph").getContext("2d");
+
+  let dolarGraphContainer = document.getElementById("dolar-graph-container");
+  dolarGraphContainer.innerHTML =  `
+    <div class="d-flex justify-content-center border border-light rounded p-4 card" id="dolar-graph-container">
+      <canvas id="dolar-graph-canva"></canvas>
+    </div>
+  `;
+
+  const ctx = document.getElementById("dolar-graph-canva").getContext("2d");
   cotizacionChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: fechas,
       datasets: [
         {
-          label: "Venta",
+          label: "Valor",
           data: precios,
           borderColor: "#4caf50",
           backgroundColor: "rgba(76, 175, 80, 0.2)",
@@ -90,6 +96,8 @@ function renderSelectedCotization(type, cotizationsVector, fromDate, toDate) {
       },
     },
   });
+
+
 }
 
 function renderDolarDashboard(data) {
@@ -97,7 +105,7 @@ function renderDolarDashboard(data) {
   const types = Object.keys(cotizationsVector);
 
   const selectorsContainer = document.getElementById("dolar-selectors");
-  
+
   const optionsHTML = types
     .map(
       (casa) =>
@@ -143,8 +151,8 @@ function renderDolarDashboard(data) {
   function renderList() {
     const from = new Date(fromInput.value);
     const to = new Date(toInput.value);
-    if(to.getTime() == from.getTime()) {
-    darkSwal.fire({
+    if (to.getTime() == from.getTime()) {
+      darkSwal.fire({
         icon: "error",
         title: "Rango de fechas inválido",
         text: "La fecha 'Desde' no puede ser igual a la fecha 'Hasta'",
